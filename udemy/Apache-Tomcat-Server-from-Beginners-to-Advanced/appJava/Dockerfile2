@@ -1,0 +1,41 @@
+# Stage 1: Build the application using Maven
+FROM maven:3.8.5-openjdk-17 AS build
+WORKDIR /app
+COPY . .
+RUN mvn clean package
+
+# Stage 2: Deploy the application on a Tomcat server
+FROM tomcat:10.1-jdk17-temurin
+
+# Tạo các thư mục cần thiết cho JMX security files
+RUN mkdir -p $CATALINA_HOME/conf/jmx-security
+
+# Copy các file cấu hình JMX vào image
+# Đảm bảo bạn đã có các file này trong thư mục 'jmx-security' trên máy host
+COPY jmx-security/jmxremote.password $CATALINA_HOME/conf/jmx-security/jmxremote.password
+COPY jmx-security/jmxremote.access $CATALINA_HOME/conf/jmx-security/jmxremote.access
+
+# Đặt quyền cho file mật khẩu (RẤT QUAN TRỌNG cho bảo mật)
+# Chỉ cho phép chủ sở hữu đọc và ghi
+RUN chmod 600 $CATALINA_HOME/conf/jmx-security/jmxremote.password
+
+# Tạo các thư mục cho log GC và heap dump
+RUN mkdir -p $CATALINA_HOME/logs/gc
+RUN mkdir -p $CATALINA_HOME/logs/heapdump
+
+# Đặt biến môi trường CATALINA_OPTS cho JVM
+ENV CATALINA_OPTS="-Xms512m -Xmx1024m \
+                   -Xlog:gc*=info:file=$CATALINA_HOME/logs/gc/gc.log:time,level,tags \
+                   -XX:+HeapDumpOnOutOfMemoryError \
+                   -XX:HeapDumpPath=$CATALINA_HOME/logs/heapdump/heapdump.hprof \
+                   -Dcom.sun.management.jmxremote \
+                   -Dcom.sun.management.jmxremote.port=9010 \
+                   -Dcom.sun.management.jmxremote.rmi.port=9010 \
+                   -Djava.rmi.server.hostname=0.0.0.0 \
+                   -Dcom.sun.management.jmxremote.authenticate=true \
+                   -Dcom.sun.management.jmxremote.password.file=$CATALINA_HOME/conf/jmx-security/jmxremote.password \
+                   -Dcom.sun.management.jmxremote.access.file=$CATALINA_HOME/conf/jmx-security/jmxremote.access \
+                   -Dcom.sun.management.jmxremote.ssl=false"
+
+COPY --from=build /app/target/ROOT.war /usr/local/tomcat/webapps/ROOT.war
+EXPOSE 8080 9010

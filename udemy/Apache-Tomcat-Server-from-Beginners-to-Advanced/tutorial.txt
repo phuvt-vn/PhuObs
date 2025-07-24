@@ -1,0 +1,22 @@
+config các file server.xml +  <distributable/> trong web.xml
+
+
+docker stop tomcat1 tomcat2 tomcat3 nginx
+docker rm tomcat1 tomcat2 tomcat3 nginx
+docker network rm backendnet
+docker network create backendnet
+
+docker run --hostname tomcat1 --name tomcat1 --network backendnet -v D:\Udemy\Apache-tomcat-for-beginners-and-advanced\examples:/usr/local/tomcat/webapps/examples -v D:\Udemy\Apache-tomcat-for-beginners-and-advanced\server1.xml:/usr/local/tomcat/conf/server.xml -d tomcat:latest
+
+
+docker run --hostname tomcat2 --name tomcat2 --network backendnet -v D:\Udemy\Apache-tomcat-for-beginners-and-advanced\examples:/usr/local/tomcat/webapps/examples -v D:\Udemy\Apache-tomcat-for-beginners-and-advanced\server2.xml:/usr/local/tomcat/conf/server.xml -d tomcat:latest
+
+
+docker run --hostname tomcat3 --name tomcat3 --network backendnet -v D:\Udemy\Apache-tomcat-for-beginners-and-advanced\examples:/usr/local/tomcat/webapps/examples -v D:\Udemy\Apache-tomcat-for-beginners-and-advanced\server3.xml:/usr/local/tomcat/conf/server.xml -d tomcat:latest
+
+
+docker run --hostname ng1 --name nginx --network backendnet -p 80:80 -v D:\Udemy\Apache-tomcat-for-beginners-and-advanced\nginx.conf:/etc/nginx/nginx.conf -d nginx
+
+
+docker start nginx
+docker logs nginx

@@ -1,4 +1,5 @@
 {
   "attachmentFolderPath": "assets/images",
-  "promptDelete": false
+  "promptDelete": false,
+  "spellcheck": false
 }
