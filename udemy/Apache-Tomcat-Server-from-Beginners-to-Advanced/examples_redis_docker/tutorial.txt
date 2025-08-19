@@ -1,0 +1,31 @@
+config các file server.xml +  <distributable/> trong web.xml
+
+
+
+docker build -t test-images .
+
+
+docker stop tomcat1 tomcat2 redis-session nginx
+docker rm tomcat1 tomcat2 redis-session nginx
+
+docker network rm app-network
+docker network create app-network
+
+
+
+docker run -d --name redis-session --hostname redis-session --network app-network redis:6.2-alpine --appendonly yes
+
+
+docker run --hostname tomcat1 --name tomcat1 --network app-network -v D:\Udemy\Apache-tomcat-for-beginners-and-advanced\examples_redis:/usr/local/tomcat/webapps/examples -v D:\Udemy\Apache-tomcat-for-beginners-and-advanced\examples_redis_docker\server1.xml:/usr/local/tomcat/conf/server.xml -d test-images:latest
+
+
+
+docker run --hostname tomcat2 --name tomcat2 --network app-network -v D:\Udemy\Apache-tomcat-for-beginners-and-advanced\examples_redis:/usr/local/tomcat/webapps/examples -v D:\Udemy\Apache-tomcat-for-beginners-and-advanced\examples_redis_docker\server2.xml:/usr/local/tomcat/conf/server.xml -d test-images:latest
+
+
+docker run --hostname ng1 --name nginx --network app-network -p 80:80 -v D:\Udemy\Apache-tomcat-for-beginners-and-advanced\examples_redis_docker\nginx.conf:/etc/nginx/nginx.conf -d nginx:latest
+
+
+docker start nginx
+docker logs tomcat1
+docker logs nginx
