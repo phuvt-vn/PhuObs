@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: configserver
+  cloud:
+    config:
+      server:
+        git:
+          #uri: file://Users/Shared/projects/microservices-demo/config-server-repository
+          uri: file://D:/Phu/PhuObs/udemy/Event-Driven-Microservices-Spring-Boot-Kafka-and-Elastic/microservices-demo/config-server-repository
+          clone-on-start: true
+    fail-fast: true
